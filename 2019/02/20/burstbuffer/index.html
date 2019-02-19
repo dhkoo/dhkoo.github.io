@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+
+    
+
+    
+        <meta name="description" content="Burst Buffer?
+버스트 버퍼는 무엇인가? 이름을 통해 우리는 대략적으로 버스트 버퍼라는 것이 “burst한 무언가에 대한 버퍼”라는 것을 알 수 있다. 버스트 버퍼는 고성능 컴퓨팅 환경에서 bursty한 I/O 처리를 위한 스토리지 서브시스템이다.
+Emergi">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Donghun Koo">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="Burst Buffer Research">
+    
+
+    <!--Open Graph Description-->
+    
+        <meta property="og:description" content="Burst Buffer?
+버스트 버퍼는 무엇인가? 이름을 통해 우리는 대략적으로 버스트 버퍼라는 것이 “burst한 무언가에 대한 버퍼”라는 것을 알 수 있다. 버스트 버퍼는 고성능 컴퓨팅 환경에서 bursty한 I/O 처리를 위한 스토리지 서브시스템이다.
+Emergi">
+    
+
+    <!--Open Graph Site Name-->
+        <meta property="og:site_name" content="Engineering Log">
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article">
+    
+
+    <!--Page Cover-->
+    
+    
+        <meta property="og:image" content="http://yoursite.com/img/cover_img.png">
+    
+
+        <meta name="twitter:card" content="summary_large_image">
+
+    
+
+    
+        <meta name="twitter:image" content="http://yoursite.com/img/cover_img.png">
+    
+
+    <!-- Title -->
+    
+    <title>Burst Buffer Research - Engineering Log</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Gallery -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/featherlight/1.3.5/featherlight.min.css" type="text/css" rel="stylesheet">
+
+    <!-- Google Analytics -->
+    
+
+
+    <!-- favicon -->
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+</head>
+
+
+<body>
+
+    <!-- Menu -->
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Donghun Koo</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                
+                    <li>
+                        <a href="/">
+                            
+                                Home
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/archives">
+                            
+                                Posts
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/categories">
+                            
+                                Categories
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/about">
+                            
+                                About
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="https://github.com/dhkoo">
+                            
+                                <i class="fa fa-github fa-stack-2x"></i>
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+    <!-- Main Content -->
+    <!-- Page Header -->
+<!-- Set your background image for this header in your post front-matter: cover -->
+
+<header class="intro-header" style="background-image: url('/img/bb_cover.png')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>Burst Buffer Research</h1>
+                    
+                    <span class="meta">
+                        <!-- Date and Author -->
+                        
+                            Posted by Donghun Koo on
+                        
+                        
+                            2019-02-20
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Tags and categories -->
+           
+                <div class="col-lg-4 col-lg-offset-2 col-md-5 col-md-offset-1 post-tags">
+                    
+                        
+
+<a href="/categories/Research/">Research</a>
+
+                    
+                </div>
+                <div class="col-lg-4 col-md-5 post-categories">
+                    
+                </div>
+            
+
+            <!-- Gallery -->
+            
+
+            <!-- Post Main Content -->
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <h2 id="Burst-Buffer"><a href="#Burst-Buffer" class="headerlink" title="Burst Buffer?"></a>Burst Buffer?</h2><hr>
+<p>버스트 버퍼는 무엇인가? 이름을 통해 우리는 대략적으로 버스트 버퍼라는 것이 “burst한 무언가에 대한 버퍼”라는 것을 알 수 있다. 버스트 버퍼는 고성능 컴퓨팅 환경에서 <em>bursty한 I/O 처리를 위한 스토리지 서브시스템</em>이다.</p>
+<h2 id="Emerging-the-Burst-Buffer"><a href="#Emerging-the-Burst-Buffer" class="headerlink" title="Emerging the Burst Buffer"></a>Emerging the Burst Buffer</h2><hr>
+<p>그렇다면 버스트 버퍼가 등장한 배경은 무엇일가?<br>컴퓨팅 파워 증가로 인한 데이터 양의 증가가 그 배경이 된다. 고성능 컴퓨팅 시스템의 컴퓨팅 파워가 증가함에 따라 computing phase와 I/O phase로 이루어진 High Performance Computing(HPC) 응용의 computing phase가 단축되면서 시간당 생성되는 데이터의 양이 증가하게 되었다. 그에 따라 기존 시스템에서의 I/O 요구사항이 높아지게 되었다.</p>
+<p>하지만, HDD 기반으로 구성되어 있는 대부분의 Parallel File System(PFS)는 HPC 환경에서 요구하는 I/O 요구사항을 충족시켜주지 못하고 있는 상황이다. 간단한 방법으로 PFS에 HDD를 추가하여 I/O 대역폭을 늘리는 방법이 있지만, 이는 비용대비 매우 효율적이지 않아 해결책으로서 사용되지 않고 있다.</p>
+<p>이러한 배경속에서 “<strong>버스트 버퍼</strong>“ 기술이 등장하였으며, 고성능 스토리지 디바이스로 구성된 버스트 버퍼는 HPC 환경에서 요구하는 충분한 I/O 성능을 제공한다.<br>버스트 버퍼는 컴퓨팅 노드와 PFS 사이에 위치하여 컴퓨팅 노드에서 발생하는 응용들의 I/O를 고속으로 처리해주며, PFS로의 직접인 접근 제어 및 데이터 필터링을 통해 PFS의 congestion을 줄여주는 I/O middleware의 역할을 수행한다.</p>
+<h2 id="Burst-Buffer-Architectures"><a href="#Burst-Buffer-Architectures" class="headerlink" title="Burst Buffer Architectures"></a>Burst Buffer Architectures</h2><hr>
+<p><img src="/img/bb_arch.png" alt=""> </p>
+<p>버스트 버퍼 구조는 대표적으로 node-local BB 그리고 remote shared BB로 구성될 수 있다. 이때 remote shared BB는 위치에 따라 I/O node BB 그리고 dedicated node BB로 나뉠 수 있다. 각각의 버스트 버퍼 구조에 따른 장단점이 있으며, 이것은 시스템의 목적 및 요구사항 그리고 비용에 따라 선호하는 버스트 버퍼 구조가 달라진다.</p>
+<h3 id="Node-local-BB"><a href="#Node-local-BB" class="headerlink" title="Node-local BB"></a>Node-local BB</h3><hr>
+<p>해당 구조는 BB가 컴퓨팅 노드에 위치하며 로컬 노드의 스토리지 스택을 사용한다. 또한 PFS로의 데이터 flushing을 위해서는 별도의 전용 스레드 또는 데몬을 통한 관리가 필요하며 노드간의 데이터 공유가 어렵다는 특징을 가진다.</p>
+<ul>
+<li><p><em>Advantages</em></p>
+<ul>
+<li>일관되고 예측가능한 성능 제공</li>
+<li>노드 수 증가에 따른 BB 성능 선형적 증가</li>
+<li>네트워크 트래픽 발생하지 않음</li>
+</ul>
+</li>
+<li><p><em>Disadvantages</em></p>
+<ul>
+<li>기본적으로 공유 네임스페이스를 지원하지 않아 HPC 응용의 주요 I/O pattern 중 하나인 N-1 패턴 및 데이터 공유를 지원하지 않음</li>
+<li>Node failure에 따른 Data resiliency를 지원하지 않음  </li>
+</ul>
+</li>
+</ul>
+<p>Node-local BB 구조는 상당히 이점이 많은 구조이며,<br>앞으로 PFS가 All-Flash로 대체될 때 그나마 살아남을 수 있는 구조라 생각한다. Node-local BB의 단점은 컴퓨팅 노드의 PFS와 같은 네트워크 기반의 파일시스템을 사용하여 N-1 지원 및 데이터 공유 기능을 지원함으로써 극복될 수는 있다. 하지만 그에 따른 컴퓨팅 노드 및 네트워크 리소스 사용 그리고 복잡도 증가와 같은 tradeoff가 발생한다. </p>
+<p>Node-local BB에 적합한 파일시스템으로 LANL에서 개발한 PLFS(Parallel Log-structure File System)라는 병렬 응용을 위한 체크포인트용 파일시스템이 있다. PLFS는 N-1 I/O 패턴으로 만들어지는 single shared file 형태의 체크포인트 파일을 N-N 형태로 변환시킴으로써 랜덤 write을 연속적인 write 형태로 바꾼다. 이를 통해 백엔드 파일시스템의 성능을 보장 해준다. PLFS 2.0부터는 각 프로세서에서 생성되는 데이터를 임의의 위치에 저장하는 옵션을 제공하여 PLFS를 통한 Node-local BB를 구성할 수 있다. 따라서 PLFS를 활용함으로써 Node-local BB의 한계였던 N-1 패턴 효과적으로 지원할 수 있게 되었다. 하지만, PLFS는 구현 특성상 read 성능이 매우 느리며, 노드간의 데이터 공유를 지원하지 않는 한계를 가지고 있다.</p>
+<h3 id="Remote-shared-BB"><a href="#Remote-shared-BB" class="headerlink" title="Remote shared BB"></a>Remote shared BB</h3><hr>
+<p>해당 구조는 BB가 컴퓨팅 노드가 아닌 I/O 노드 또는 BB 전용의 노드에 위치하는 구조이다. 대부분 동일한 네임스페이스를 제공하는 fast resource pool 형태로 구현되어지며, 컴퓨팅 노드가 직접 BB 네임스페이스를 직접 마운트하는 형태로 사용되어진다.</p>
+<ul>
+<li><p><em>Advantages</em></p>
+<ul>
+<li>N-1 패턴 지원</li>
+<li>데이터 공유</li>
+<li>BB 관리의 편의성 및 응용과의 리소스 사용 분리</li>
+</ul>
+</li>
+<li><p><em>Disadvantages</em></p>
+<ul>
+<li>BB 공유에 따른 데이터 mixed으로 인한 PFS 성능 영향</li>
+<li>네트워크 대역폭, 노드 수, 슬롯 수에 따른 BB의 I/O 대역폭의 제한<ul>
+<li>I/O node BB<ul>
+<li>PFS와의 네트워크 공유로 인한 PFS의 성능 영향</li>
+</ul>
+</li>
+<li>Dedicated node BB<ul>
+<li>전용 노드 구축으로 인한 비용문제</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Remote shared BB 구조는 가장 일반적으로 사용되는 구조로 많은 슈퍼컴퓨터 시스템에서 채택되어 사용되고 있다. 비용의 문제에서 어느정도 자유롭다면 전용의 버스트 버퍼 노드를 충분히 구축하여 운영하는 것이 가장좋은 선택이라고 할 수 있다.<br>하지만 해당 구조는 비용대비 효율이 좋은 모델은 아니지만, 현재는 해당 구조를 기반으로 많은 연구가 진행되고 있는 상황이다.</p>
+<h2 id="Burst-Buffe-Use-Cases"><a href="#Burst-Buffe-Use-Cases" class="headerlink" title="Burst Buffe Use Cases"></a>Burst Buffe Use Cases</h2><hr>
+<ul>
+<li>Checkpoint/Restart를 위한 checkpoint 파일 저장소</li>
+<li>Stage in/out 제공</li>
+<li>Write-through Cache 역할</li>
+<li>Data sharing 제공</li>
+<li>Global write 정보를 활용한 reshaping writes</li>
+</ul>
+<h2 id="Burst-Buffer-Papers"><a href="#Burst-Buffer-Papers" class="headerlink" title="Burst Buffer Papers"></a>Burst Buffer Papers</h2><hr>
+<ul>
+<li><p>BB standard 논문</p>
+<ul>
+<li>“On the role of burst buffers in leadership-class storage systems”</li>
+</ul>
+</li>
+<li><p>Node-local BB 관련 논문</p>
+<ul>
+<li>“An Ephemeral Burst-Buffer File System for Scientiﬁc Applications”</li>
+<li>“오픈소스 파일시스템을 활용한 버스트 버퍼 프로토타입 구축 및 성능 분석 연구”</li>
+</ul>
+</li>
+<li><p>Remote shared BB 관련 논문</p>
+<ul>
+<li>“Accelerating Science with the NERSC Burst Buffer Early User Program”</li>
+<li>“Jitter-Free Co-Processing on a Prototype Exascale Storage Stack”</li>
+<li>“BurstMem: A High-Performance Burst Buffer System for Scientiﬁc Applications”</li>
+<li>“Accelerating a Burst Buffer via User-Level I/O Isolation”</li>
+</ul>
+</li>
+<li><p>BB 비교 분석 논문</p>
+<ul>
+<li>“To share or not to share: comparing burst buffer architectures”</li>
+<li>“Quantifying I/O and Communication Traffic Interference on Dragonfly Networks Equipped with Burst Buffers”</li>
+</ul>
+</li>
+<li><p>BB 스케쥴링 관련 논문</p>
+<ul>
+<li>“Trio: Burst buffer based i/o orchestration”</li>
+<li>“Scalable I/O-Aware Job Scheduling for Burst Buffer Enabled HPC Clusters”</li>
+<li>“Managing I/O Interference in a Shared Burst Buffer System”</li>
+<li>“Leveraging burst buffer coordination to prevent I/O interference”</li>
+</ul>
+</li>
+<li><p>BB 최적화 관련 논문</p>
+<ul>
+<li>“Scientific Workflows at DataWarp-Speed: Accelerated Data-Intensive Science Using NERSC’s Burst Buffer”</li>
+<li>“A User-Level InfiniBand-Based File System and Checkpoint Strategy for Burst Buffers”</li>
+<li>“SSDUP: a traffic-aware ssd burst buffer for HPC systems”</li>
+</ul>
+</li>
+</ul>
+
+
+                
+            </div>
+
+            <!-- Comments -->
+            
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    
+    <hr>
+    <h3>Comments:</h3>
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+
+                </div>
+            
+        </div>
+    </div>
+</article>
+
+    <!-- Footer -->
+    <hr>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+
+                    
+
+                    
+                        <li>
+                            <a href="https://github.com/klugjo/hexo-theme-clean-blog" target="_blank">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    
+
+                    
+
+                    
+
+                    
+                </ul>
+                <p class="copyright text-muted">&copy; 2019 Donghun Koo<br></p>
+                <p class="copyright text-muted">Original Theme <a target="_blank" href="http://startbootstrap.com/template-overviews/clean-blog/">Clean Blog</a> from <a href="http://startbootstrap.com/" target="_blank">Start Bootstrap</a></p>
+                <p class="copyright text-muted">Adapted for <a target="_blank" href="https://hexo.io/">Hexo</a> by <a href="http://www.codeblocq.com/" target="_blank">Jonathan Klughertz</a></p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+    <!-- After footer scripts -->
+    
+<!-- jQuery -->
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<!-- Gallery -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/featherlight/1.3.5/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
+
+<!-- Disqus Comments -->
+
+<script type="text/javascript">
+    var disqus_shortname = 'dhkoo';
+
+    (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+</body>
+
+</html>
