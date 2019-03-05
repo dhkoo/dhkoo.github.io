@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+
+    
+
+    
+        <meta name="description" content="본 포스터는 https://www.scylladb.com/2017/10/05/io-access-methods-scylla/ 의 본문을 번역 및 의역한 글로 리눅스에서 사용할 수 있는 I/O 방법들과, 다양한 I/O 접근 방법에 따른 tradeoff에 대해서 기술한다. ">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Donghun Koo">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="리눅스의 다양한 I/O 접근 방법 ( Different I/O Access Methods for Linux ) - 번역">
+    
+
+    <!--Open Graph Description-->
+    
+        <meta property="og:description" content="본 포스터는 https://www.scylladb.com/2017/10/05/io-access-methods-scylla/ 의 본문을 번역 및 의역한 글로 리눅스에서 사용할 수 있는 I/O 방법들과, 다양한 I/O 접근 방법에 따른 tradeoff에 대해서 기술한다. ">
+    
+
+    <!--Open Graph Site Name-->
+        <meta property="og:site_name" content="Engineering Log">
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article">
+    
+
+    <!--Page Cover-->
+    
+    
+        <meta property="og:image" content="http://yoursite.com/img/cover.png">
+    
+
+        <meta name="twitter:card" content="summary_large_image">
+
+    
+
+    
+        <meta name="twitter:image" content="http://yoursite.com/img/cover.png">
+    
+
+    <!-- Title -->
+    
+    <title>리눅스의 다양한 I/O 접근 방법 ( Different I/O Access Methods for Linux ) - 번역 - Engineering Log</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Gallery -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/featherlight/1.3.5/featherlight.min.css" type="text/css" rel="stylesheet">
+
+    <!-- Google Analytics -->
+    
+
+
+    <!-- favicon -->
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+
+</head>
+
+
+<body>
+
+    <!-- Menu -->
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Donghun Koo</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                
+                    <li>
+                        <a href="/">
+                            
+                                Home
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/archives">
+                            
+                                Posts
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/categories">
+                            
+                                Categories
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/about">
+                            
+                                About
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="https://github.com/dhkoo">
+                            
+                                <i class="fa fa-github fa-stack-2x"></i>
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+    <!-- Main Content -->
+    <!-- Page Header -->
+<!-- Set your background image for this header in your post front-matter: cover -->
+
+<header class="intro-header" style="background-image: url('/img/cover.png')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>리눅스의 다양한 I/O 접근 방법 ( Different I/O Access Methods for Linux ) - 번역</h1>
+                    
+                    <span class="meta">
+                        <!-- Date and Author -->
+                        
+                            Posted by Donghun Koo on
+                        
+                        
+                            2019-03-05
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Tags and categories -->
+           
+                <div class="col-lg-4 col-lg-offset-2 col-md-5 col-md-offset-1 post-tags">
+                    
+                        
+
+<a href="/categories/Linux/">Linux</a>
+
+                    
+                </div>
+                <div class="col-lg-4 col-md-5 post-categories">
+                    
+                </div>
+            
+
+            <!-- Gallery -->
+            
+
+            <!-- Post Main Content -->
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <p><span sytle=" font: initial 12pt/100% Nanum Gothic"></span></p>
+<p>본 포스터는 <a href="https://www.scylladb.com/2017/10/05/io-access-methods-scylla/" target="_blank" rel="noopener">https://www.scylladb.com/2017/10/05/io-access-methods-scylla/</a> 의 본문을 번역 및 의역한 글로 리눅스에서 사용할 수 있는 I/O 방법들과, 다양한 I/O 접근 방법에 따른 tradeoff에 대해서 기술한다. </p>
+<h2 id="Choices-for-accessing-files"><a href="#Choices-for-accessing-files" class="headerlink" title="Choices for accessing files"></a>Choices for accessing files</h2><p>리눅스에서 선택할 수 있는 I/O는 4가지 종류가 있다.<br>    : Read/Write, mmap, Direct I/O (DIO) 그리고 Asynchronous Direct I/O (AIO/DIO)</p>
+<h2 id="Traditional-Read-Write"><a href="#Traditional-Read-Write" class="headerlink" title="Traditional Read/Write"></a>Traditional Read/Write</h2><p>리눅스의 전통적인 I/O 방식으로 read, write 시스템 콜을 사용한다. </p>
+<p>현재의 구현에서 read 시스템 콜은 커널에게 파일의 해당부분을 읽고 요청한 프로세스 주소 공간으로 데이터를 복사하는 작업을 요청한다. 요청한 데이터들이 페이지 캐시에 존재하는 경우, 커널은 해당 데이터를 복사하고 바로 리턴하여 read를 완료한다. 페이지 캐시에 데이터가 없는 경우에는 커널은 디스크에서 페이지 캐시로 요청된 데이터를 읽어오는 작업을 준비하고, 콜링한 스레드를 블락시킨다. 데이터가 페이지 캐시로 다 옮겨져 데이터가 사용 가능해지면 커널은 블락된 스레드를 복귀시키고 데이터를 복사한다.</p>
+<p>일반적으로 write에 경우에는 페이지 캐시에 데이터 쓰기 작업을 진행한 후 연산이 종료되며, 페이지 캐시에 쓰인 데이터는 write-back 방식으로 일정시간이 지난 후 디스크에 쓰여지게된다.</p>
+<p><img src="/img/ios/fig1.png" alt=""></p>
+<h2 id="Mmap"><a href="#Mmap" class="headerlink" title="Mmap"></a>Mmap</h2><p>mmap 시스템 콜은 응용에 할당된 메모리 주소 공간에 파일을 맵핑하는 방법을 말한다. 즉, 주소 공간의 섹션을 통해서 파일의 데이터가 포함된 페이지 캐시내의 페이지들을 직접 참조할 수 있게 된다. 따라서 응용은 프로세서의 메모리 read/write 연산을 통해 데이터 접근이 가능해진다.</p>
+<p>요청된 데이터가 캐시에 있는 경우, 커널은 read/write을 메모리 속도로 수행한다.</p>
+<p>요청된 데이터가 캐시에 없는 경우, page-fault가 발생하여 커널은 active 스레드를 sleep 상태로 전환하고 해당 페이지에 대한 데이터를 디스크에서 읽어온다. 데이터에 대한 페이지 캐시 복사가 완료되면, sleep시킨 스레드를 다시 깨워 해당 데이터의 사용할 수 있도록한다.</p>
+<p><img src="/img/ios/fig2.png" alt=""></p>
+<h2 id="Direct-I-O-DIO"><a href="#Direct-I-O-DIO" class="headerlink" title="Direct I/O (DIO)"></a>Direct I/O (DIO)</h2><p>기존의 read/write과 mmap I/O 작업은 커널의 페이지 캐시를 포함하며 커널의 관리하에 스케쥴링이 이루어진다.</p>
+<p>만약 응용에서 I/O 스케쥴링을 관리하고 싶은 경우에는 Direct I/O를 사용함으로써 이를 가능하게 해줄 수 있다.</p>
+<p>Direct I/O는 파일을 open할 때 O_DIRECT 플래그를 사용함으로써 사용할 수 있다. Direct I/O에 경우, 기존 I/O 방법들과 다르게 캐시에 접근하지 않고 디스크를 직접 접근한다. 이러한 접근은 요청 스레드의 상태를 sleep 상태로 전환시키고 디스크 컨트롤러가 커널을 우회하여 데이터를 직접 유저공간에 복사하도록 한다.</p>
+<p><img src="/img/ios/fig3.png" alt=""></p>
+<h2 id="Asynchronous-Direct-I-O-AIO-DIO"><a href="#Asynchronous-Direct-I-O-AIO-DIO" class="headerlink" title="Asynchronous Direct I/O (AIO/DIO)"></a>Asynchronous Direct I/O (AIO/DIO)</h2><p>Direct I/O의 세련된 버전인 AIO/DIO는 기존의 DIO와 비슷하게 동작하지만 I/O를 요청한 스레드가 sleep 즉, 블락되지 않는 차이를 가진다. 대신 AIO/DIO에서는 io_submit 시스템 콜을 사용하여 Direct I/O 연산들을 직접 스케쥴하며 스레드는 블락되지 않는다. 따라서 I/O 연산은 일반 스레드 연산과 함께 병렬적으로 동작한다. io_getevents 시스템 콜은 I/O 연산의 결과를 waiting 또는 collecting을 위해 사용된다. DIO와 같이 커널의 페이지 캐시는 우회되고, 디스크 컨트롤러는 데이터를 유저공간으로 직접 복사는 역할을 수행한다.</p>
+<p><img src="/img/ios/fig4.png" alt=""></p>
+<h2 id="Understanding-the-Tradeoffs"><a href="#Understanding-the-Tradeoffs" class="headerlink" title="Understanding the Tradeoffs"></a>Understanding the Tradeoffs</h2><p><img src="/img/ios/fig5.png" alt=""></p>
+<h3 id="Cache-Control"><a href="#Cache-Control" class="headerlink" title="Cache Control"></a>Cache Control</h3><p>read/write과 mmap에서의 caching은 커널이 담당하며, 메모리의 대부분은 일반적으로 페이지 캐시를 위한 용도로 사용된다. 따라서 메모리의 페이지가 부족해지는 경우, 커널은 어떤 페이지를 디스크로 쫓아낼지 결정하게된다. 이때의 결정은 madivse 또는 fadvise와 같은 시스템 콜을 사용하여 커널에게 어떤 페이지를 쫓아낼지에 대한 응용관점에서의 hint를 제공함으로써 더 좋은 선택을 할 수 있도록 도와준다.</p>
+<p>커널에서 사용되는 caching 관련 알고리즘들은 수십년간 커널 개발자들에의해 개선 및 검증이 이루어졌다.<br>따라서 커널의 caching 제어는 일반적으로 대부분의 응용에 좋은 성능을 보장해 준다. 즉 general purpose한 형태로 다양한 응용에 사용되기 적합하다. 하지만, 각각의 응용에 최적화되지 않았기 때문에 캐싱 제어를 유저가 함으로써 성능을 개선시킬 여지가 충분히 있다. </p>
+<h3 id="Copying-and-MMU-activity"><a href="#Copying-and-MMU-activity" class="headerlink" title="Copying and MMU activity"></a>Copying and MMU activity</h3><p>mmap의 장점 중 하나는 데이터가 캐싱되어 있을 때 커널을 완전히 우회한다는 점이다. 커널에서 유저공간으로의 데이터 복사가 필요 없어지면서 해당 작업을 위한 프로세서의 사이클 수가 절약된다. 이러한 장점은 대부분의 데이터가 캐시에 있을 때 극대화된다.</p>
+<p>mmap의 단점은 데이터가 캐시에 존재하지 않을 때 발생하게 된다. 이는 보통 스토리지 크기와 메모리의 크기가 상당히 차이가 날 때 발생한다. 캐시가 가득 찬 경우, 새롭게 캐싱되는 페이지들은 기존의 캐싱되어있는 페이지들의 eviction을 유발하며 이러한 작업은 커널이 inactive page들을 스캔하고 eviction을 위한 후보를 지정하기 위해 페이지 테이블에 접근하는 작업을 유발한다. 게다가 mmap을 위한 페이지 테이블 메모리도 필요로하는데 맵핑된 파일의 약 0.2% 정도의 크기를 요구한다. 실제로는 이 비율이 작게 느껴지지만, 스토리지와 메모리의 비율이 100:1이라고 했을 때 페이지 테이블의 크기는 메모리의 20%를 차지하게 된다.</p>
+<h3 id="I-O-scheduling"><a href="#I-O-scheduling" class="headerlink" title="I/O scheduling"></a>I/O scheduling</h3><p>커널의 캐싱 제어로 인한 문제점 중 한가지는 응용이 I/O 스케쥴링의 대한 권한을 잃는다는 점이다. 커널은 어느 것이든 적절한 데이터 블록을 선택하고 read/write을 위해 스케쥴링한다. 이로인해 발생할 수 있는 문제는 다음과 같다.</p>
+<p>​* Write storm : 커널이 수 많은 write을 스케쥴링을 할 때, 디스크의 장시간 바빠짐으로 Read Latency에 영향을 줄 수 있다.<br>* I/O distinction : 커널은 중요한 I/O와 덜 중요한 I/O를 구분할 수 없다. 따라서 백그라운드로 수행되고 있는 I/O 작업으로 인해 포그라운드로 수행되고 있는 작업의 Latency에 영향을 줄 수 있다.</p>
+<p>​커널의 페이지 캐시를 우회하는 경우, 응용은 자체적으로 I/O를 스케쥴링해야한다. 하지만 충분한 주의와 노력이 있다면 위 문제들은 해결 될 수 있다.</p>
+<p>​Direct I/O를 사용하는 경우, 각 스레드는 I/O의 이슈들을 제어한다. 하지만 커널은 스레드의 수행을 제어하기 때문에 실질적으로 I/O 이슈는 커널과 응용사이에서 혼합되어 스케쥴링된다. AIO/DIO를 사용할 경우, I/O가 이슈되는 것을 완전히 제어할 수 있다.</p>
+<h3 id="I-O-alignment"><a href="#I-O-alignment" class="headerlink" title="I/O alignment"></a>I/O alignment</h3><p>스토리지 디바이스는 일반적으로 512byte 또는 4k 단위의 크기를 가지는 block으로 I/O를 수행한다. read/write 또는 mmap을 사용할 경우, 커널은 alignment를 자동적으로 수행시킨다. 따라서 작은 read 또는 write에 경우 I/O를 이슈하기 전에 블록의 경계에 맞게 확장시키는 작업을 수행한다.</p>
+<p>​Direct I/O에 경우 블록의 alignment는 전적으로 응용에게 달려있다. 따라서 이는 응용에 복잡성을 유발하지만 장점 또한 제공한다. 그 예로 커널은 512byte 경계내에서 충분한 데이터 양이라도 4k 경계에 맞게 over-align을 하는데 direct I/O를 사용하면 512byte로 read를 나열하여 이슈할 수 있어 small read에 대해서 대역폭을 약 8배 줄일 수 있다.</p>
+<h3 id="Application-complexity"><a href="#Application-complexity" class="headerlink" title="Application complexity"></a>Application complexity</h3><p>응용에서 직접 제어하는 것이 많아질 수록 응용의 복잡성은 증가한다. 다른 한편으로, 이러한 복잡성 증가에도 응용에서 직접 관리할 수 있다는 점은 더 나은 관리와 선택을 할 수 있게하여 내부적으로 더욱 효과적으로 동작할 수 있게한다. 하지만 이러한 알고리즘을 구현하고 검증해야하는 오버헤드가 있으며 AIO를 사용하는 경우 응용이 callback or coroutine or 유사한 메소드들의 사용을 요구하여 많은 라이브러리의 재사용성을 줄이는 단점을 유발시킬 수 있다.</p>
+<p></p>
+
+
+                
+            </div>
+
+            <!-- Comments -->
+            
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    
+    <hr>
+    <h3>Comments:</h3>
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+
+                </div>
+            
+        </div>
+    </div>
+</article>
+
+    <!-- Footer -->
+    <hr>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+
+                    
+
+                    
+                        <li>
+                            <a href="https://github.com/klugjo/hexo-theme-clean-blog" target="_blank">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    
+
+                    
+
+                    
+
+                    
+                </ul>
+                <p class="copyright text-muted">&copy; 2019 Donghun Koo<br></p>
+                <p class="copyright text-muted">Original Theme <a target="_blank" href="http://startbootstrap.com/template-overviews/clean-blog/">Clean Blog</a> from <a href="http://startbootstrap.com/" target="_blank">Start Bootstrap</a></p>
+                <p class="copyright text-muted">Adapted for <a target="_blank" href="https://hexo.io/">Hexo</a> by <a href="http://www.codeblocq.com/" target="_blank">Jonathan Klughertz</a></p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+    <!-- After footer scripts -->
+    
+<!-- jQuery -->
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<!-- Gallery -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/featherlight/1.3.5/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
+
+<!-- Disqus Comments -->
+
+<script type="text/javascript">
+    var disqus_shortname = 'dhkoo';
+
+    (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+</body>
+
+</html>
