@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://yoursite.com/2019/03/07/cache/</loc>
+    <loc>http://yoursite.com/2019/03/08/vim/</loc>
     
-    <lastmod>2019-03-07T05:18:36.660Z</lastmod>
+    <lastmod>2019-03-07T15:52:19.277Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2019/03/08/cache/</loc>
+    
+    <lastmod>2019-03-07T15:00:00.000Z</lastmod>
     
   </url>
   
